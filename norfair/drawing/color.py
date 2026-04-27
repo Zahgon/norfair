@@ -25,20 +25,7 @@ def hex_to_bgr(hex_value: str) -> ColorType:
     ValueError
         if the string is invalid
     """
-    if re.match("#[a-f0-9]{6}$", hex_value):
-        return (
-            int(hex_value[5:7], 16),
-            int(hex_value[3:5], 16),
-            int(hex_value[1:3], 16),
-        )
-
-    if re.match("#[a-f0-9]{3}$", hex_value):
-        return (
-            int(hex_value[3] * 2, 16),
-            int(hex_value[2] * 2, 16),
-            int(hex_value[1] * 2, 16),
-        )
-    raise ValueError(f"'{hex_value}' is not a valid color")
+    pass
 
 
 class Color:
@@ -250,13 +237,7 @@ def parse_color(color_like: ColorLike) -> ColorType:
     Color
         The BGR tuple.
     """
-    if isinstance(color_like, str):
-        if color_like.startswith("#"):
-            return hex_to_bgr(color_like)
-        else:
-            return getattr(Color, color_like)
-    # TODO: validate?
-    return tuple([int(v) for v in color_like])
+    pass
 
 
 PALETTES = {
@@ -338,19 +319,7 @@ class Palette:
             - the name of one of the predefined palettes `tab10`, `tab20`, or `colorblind`
             - a list of ColorLike objects that can be parsed by [`parse_color`][norfair.drawing.color.parse_color]
         """
-        if isinstance(palette, str):
-            try:
-                cls._colors = PALETTES[palette]
-            except KeyError as e:
-                raise ValueError(
-                    f"Invalid palette name '{palette}', valid values are {PALETTES.keys()}"
-                ) from e
-        else:
-            colors = []
-            for c in palette:
-                colors.append(parse_color(c))
-
-            cls._colors = colors
+        pass
 
     @classmethod
     def set_default_color(cls, color: ColorLike):
@@ -362,10 +331,8 @@ class Palette:
         color : ColorLike
             The new default color.
         """
-        cls._default_color = parse_color(color)
+        pass
 
     @classmethod
     def choose_color(cls, hashable: Hashable) -> ColorType:
-        if hashable is None:
-            return cls._default_color
-        return cls._colors[abs(hash(hashable)) % len(cls._colors)]
+        pass

@@ -176,7 +176,7 @@ class Video:
         cv2.destroyAllWindows()
 
     def _fail(self, msg: str):
-        raise RuntimeError(msg)
+        pass
 
     def write(self, frame: np.ndarray) -> int:
         """
@@ -192,24 +192,7 @@ class Video:
         int
             _description_
         """
-        if self.output_video is None:
-            # The user may need to access the output file path on their code
-            output_file_path = self.get_output_file_path()
-            fourcc = cv2.VideoWriter_fourcc(*self.get_codec_fourcc(output_file_path))
-            # Set on first frame write in case the user resizes the frame in some way
-            output_size = (
-                frame.shape[1],
-                frame.shape[0],
-            )  # OpenCV format is (width, height)
-            self.output_video = cv2.VideoWriter(
-                output_file_path,
-                fourcc,
-                self.output_fps,
-                output_size,
-            )
-
-        self.output_video.write(frame)
-        return cv2.waitKey(1)
+        pass
 
     def show(self, frame: np.ndarray, downsample_ratio: float = 1.0) -> int:
         """
@@ -229,17 +212,7 @@ class Video:
         int
             _description_
         """
-        # Resize to lower resolution for faster streaming over slow connections
-        if downsample_ratio != 1.0:
-            frame = cv2.resize(
-                frame,
-                (
-                    frame.shape[1] // downsample_ratio,
-                    frame.shape[0] // downsample_ratio,
-                ),
-            )
-        cv2.imshow("Output", frame)
-        return cv2.waitKey(1)
+        pass
 
     def get_output_file_path(self) -> str:
         """
@@ -252,50 +225,14 @@ class Video:
         str
             The path to the file.
         """
-        if not os.path.isdir(self.output_path):
-            return self.output_path
-
-        if self.input_path is not None:
-            file_name = self.input_path.split("/")[-1].split(".")[0]
-        else:
-            file_name = "camera_{self.camera}"
-        file_name = f"{file_name}_out.{self.output_extension}"
-
-        return os.path.join(self.output_path, file_name)
+        pass
 
     def get_codec_fourcc(self, filename: str) -> Optional[str]:
-        if self.output_fourcc is not None:
-            return self.output_fourcc
-
-        # Default codecs for each extension
-        extension = filename[-3:].lower()
-        if "avi" == extension:
-            return "XVID"
-        elif "mp4" == extension:
-            return "mp4v"  # When available, "avc1" is better
-        else:
-            self._fail(
-                f"[bold red]Could not determine video codec for the provided output filename[/bold red]: "
-                f"[yellow]{filename}[/yellow]\n"
-                f"Please use '.mp4', '.avi', or provide a custom OpenCV fourcc codec name."
-            )
-            return (
-                None  # Had to add this return to make mypya happy. I don't like this.
-            )
+        pass
 
     def abbreviate_description(self, description: str) -> str:
         """Conditionally abbreviate description so that progress bar fits in small terminals"""
-        terminal_columns, _ = get_terminal_size()
-        space_for_description = (
-            int(terminal_columns) - 25
-        )  # Leave 25 space for progressbar
-        if len(description) < space_for_description:
-            return description
-        else:
-            return "{} ... {}".format(
-                description[: space_for_description // 2 - 3],
-                description[-space_for_description // 2 + 3 :],
-            )
+        pass
 
 
 class VideoFromFrames:
@@ -352,9 +289,4 @@ class VideoFromFrames:
         raise StopIteration()
 
     def update(self, frame):
-        self.video.write(frame)
-        cv2.waitKey(1)
-
-        if self.frame_number > self.length:
-            cv2.destroyAllWindows()
-            self.video.release()
+        pass

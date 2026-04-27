@@ -51,18 +51,7 @@ class Drawer:
         np.ndarray
             The resulting frame.
         """
-        if radius is None:
-            radius = int(max(max(frame.shape) * 0.005, 1))
-        if thickness is None:
-            thickness = radius - 1
-
-        return cv2.circle(
-            frame,
-            position,
-            radius=radius,
-            color=color,
-            thickness=thickness,
-        )
+        pass
 
     @classmethod
     def text(
@@ -107,36 +96,7 @@ class Drawer:
         np.ndarray
             The resulting frame.
         """
-        if size is None:
-            size = min(max(max(frame.shape) / 4000, 0.5), 1.5)
-        if thickness is None:
-            thickness = int(round(size) + 1)
-
-        if thickness is None and size is not None:
-            thickness = int(round(size) + 1)
-        # adjust position based on the thickness
-        anchor = (position[0] + thickness // 2, position[1] - thickness // 2)
-        if shadow:
-            frame = cv2.putText(
-                frame,
-                text,
-                (anchor[0] + shadow_offset, anchor[1] + shadow_offset),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                size,
-                shadow_color,
-                thickness,
-                cv2.LINE_AA,
-            )
-        return cv2.putText(
-            frame,
-            text,
-            anchor,
-            cv2.FONT_HERSHEY_SIMPLEX,
-            size,
-            color,
-            thickness,
-            cv2.LINE_AA,
-        )
+        pass
 
     @classmethod
     def rectangle(
@@ -165,14 +125,7 @@ class Drawer:
         np.ndarray
             The resulting frame.
         """
-        frame = cv2.rectangle(
-            frame,
-            tuple(points[0]),
-            tuple(points[1]),
-            color=color,
-            thickness=thickness,
-        )
-        return frame
+        pass
 
     @classmethod
     def cross(
@@ -204,24 +157,7 @@ class Drawer:
         np.ndarray
             The resulting frame.
         """
-        middle_x, middle_y = center
-        left, top = center - radius
-        right, bottom = center + radius
-        frame = cls.line(
-            frame,
-            start=(middle_x, top),
-            end=(middle_x, bottom),
-            color=color,
-            thickness=thickness,
-        )
-        frame = cls.line(
-            frame,
-            start=(left, middle_y),
-            end=(right, middle_y),
-            color=color,
-            thickness=thickness,
-        )
-        return frame
+        pass
 
     @classmethod
     def line(
@@ -253,13 +189,7 @@ class Drawer:
         np.ndarray
             The resulting frame.
         """
-        return cv2.line(
-            frame,
-            pt1=start,
-            pt2=end,
-            color=color,
-            thickness=thickness,
-        )
+        pass
 
     @classmethod
     def alpha_blend(
@@ -291,11 +221,7 @@ class Drawer:
         np.ndarray
             The resulting frame.
         """
-        if beta is None:
-            beta = 1 - alpha
-        return cv2.addWeighted(
-            src1=frame1, src2=frame2, alpha=alpha, beta=beta, gamma=gamma
-        )
+        pass
 
 
 class Drawable:

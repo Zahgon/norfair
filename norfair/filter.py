@@ -1,7 +1,13 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 
 import numpy as np
-from filterpy.kalman import KalmanFilter
+
+try:
+    from filterpy.kalman import KalmanFilter
+except ImportError:
+    KalmanFilter = None  # type: ignore[assignment,misc]
 
 
 class FilterFactory(ABC):
@@ -58,40 +64,7 @@ class FilterPyKalmanFilterFactory(FilterFactory):
         KalmanFilter
             The kalman filter
         """
-        num_points = initial_detection.shape[0]
-        dim_points = initial_detection.shape[1]
-        dim_z = dim_points * num_points
-        dim_x = 2 * dim_z  # We need to accommodate for velocities
-
-        filter = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
-
-        # State transition matrix (models physics): numpy.array()
-        filter.F = np.eye(dim_x)
-        dt = 1  # At each step we update pos with v * dt
-
-        filter.F[:dim_z, dim_z:] = dt * np.eye(dim_z)
-
-        # Measurement function: numpy.array(dim_z, dim_x)
-        filter.H = np.eye(
-            dim_z,
-            dim_x,
-        )
-
-        # Measurement uncertainty (sensor noise): numpy.array(dim_z, dim_z)
-        filter.R *= self.R
-
-        # Process uncertainty: numpy.array(dim_x, dim_x)
-        # Don't decrease it too much or trackers pay too little attention to detections
-        filter.Q[dim_z:, dim_z:] *= self.Q
-
-        # Initial state: numpy.array(dim_x, 1)
-        filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
-        filter.x[dim_z:] = 0
-
-        # Estimation uncertainty: numpy.array(dim_x, dim_x)
-        filter.P[dim_z:, dim_z:] *= self.P
-
-        return filter
+        pass
 
 
 class NoFilter:
@@ -100,19 +73,11 @@ class NoFilter:
         self.x = np.zeros((dim_x, 1))
 
     def predict(self):
-        return
+        pass
 
     def update(self, detection_points_flatten, R=None, H=None):
 
-        if H is not None:
-            diagonal = np.diagonal(H).reshape((self.dim_z, 1))
-            one_minus_diagonal = 1 - diagonal
-
-            detection_points_flatten = np.multiply(
-                diagonal, detection_points_flatten
-            ) + np.multiply(one_minus_diagonal, self.x[: self.dim_z])
-
-        self.x[: self.dim_z] = detection_points_flatten
+        pass
 
 
 class NoFilterFactory(FilterFactory):
@@ -132,17 +97,7 @@ class NoFilterFactory(FilterFactory):
     """
 
     def create_filter(self, initial_detection: np.ndarray):
-        num_points = initial_detection.shape[0]
-        dim_points = initial_detection.shape[1]
-        dim_z = dim_points * num_points  # flattened positions
-        dim_x = 2 * dim_z  # We need to accommodate for velocities
-
-        no_filter = NoFilter(
-            dim_x,
-            dim_z,
-        )
-        no_filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
-        return no_filter
+        pass
 
 
 class OptimizedKalmanFilter:
@@ -169,62 +124,11 @@ class OptimizedKalmanFilter:
         self.default_r = r * np.ones((dim_z, 1))
 
     def predict(self):
-        self.x[: self.dim_z] += self.x[self.dim_z :]
+        pass
 
     def update(self, detection_points_flatten, R=None, H=None):
 
-        if H is not None:
-            diagonal = np.diagonal(H).reshape((self.dim_z, 1))
-            one_minus_diagonal = 1 - diagonal
-        else:
-            diagonal = np.ones((self.dim_z, 1))
-            one_minus_diagonal = np.zeros((self.dim_z, 1))
-
-        if R is not None:
-            kalman_r = np.diagonal(R).reshape((self.dim_z, 1))
-        else:
-            kalman_r = self.default_r
-
-        error = np.multiply(detection_points_flatten - self.x[: self.dim_z], diagonal)
-
-        vel_var_plus_pos_vel_cov = self.pos_vel_covariance + self.vel_variance
-        added_variances = (
-            self.pos_variance
-            + self.pos_vel_covariance
-            + vel_var_plus_pos_vel_cov
-            + self.q_Q
-            + kalman_r
-        )
-
-        kalman_r_over_added_variances = np.divide(kalman_r, added_variances)
-        vel_var_plus_pos_vel_cov_over_added_variances = np.divide(
-            vel_var_plus_pos_vel_cov, added_variances
-        )
-
-        added_variances_or_kalman_r = np.multiply(
-            added_variances, one_minus_diagonal
-        ) + np.multiply(kalman_r, diagonal)
-
-        self.x[: self.dim_z] += np.multiply(
-            diagonal, np.multiply(1 - kalman_r_over_added_variances, error)
-        )
-        self.x[self.dim_z :] += np.multiply(
-            diagonal, np.multiply(vel_var_plus_pos_vel_cov_over_added_variances, error)
-        )
-
-        self.pos_variance = np.multiply(
-            1 - kalman_r_over_added_variances, added_variances_or_kalman_r
-        )
-        self.pos_vel_covariance = np.multiply(
-            vel_var_plus_pos_vel_cov_over_added_variances, added_variances_or_kalman_r
-        )
-        self.vel_variance += self.q_Q - np.multiply(
-            diagonal,
-            np.multiply(
-                np.square(vel_var_plus_pos_vel_cov_over_added_variances),
-                added_variances,
-            ),
-        )
+        pass
 
 
 class OptimizedKalmanFilterFactory(FilterFactory):
@@ -264,20 +168,4 @@ class OptimizedKalmanFilterFactory(FilterFactory):
         self.vel_variance = vel_variance
 
     def create_filter(self, initial_detection: np.ndarray):
-        num_points = initial_detection.shape[0]
-        dim_points = initial_detection.shape[1]
-        dim_z = dim_points * num_points  # flattened positions
-        dim_x = 2 * dim_z  # We need to accommodate for velocities
-
-        custom_filter = OptimizedKalmanFilter(
-            dim_x,
-            dim_z,
-            pos_variance=self.pos_variance,
-            pos_vel_covariance=self.pos_vel_covariance,
-            vel_variance=self.vel_variance,
-            q=self.Q,
-            r=self.R,
-        )
-        custom_filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
-
-        return custom_filter
+        pass

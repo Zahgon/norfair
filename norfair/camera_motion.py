@@ -69,10 +69,10 @@ class TranslationTransformation(CoordinatesTransformation):
         self.movement_vector = movement_vector
 
     def abs_to_rel(self, points: np.ndarray):
-        return points + self.movement_vector
+        pass
 
     def rel_to_abs(self, points: np.ndarray):
-        return points - self.movement_vector
+        pass
 
 
 class TranslationTransformationGetter(TransformationGetter):
@@ -147,23 +147,10 @@ class HomographyTransformation(CoordinatesTransformation):
         self.inverse_homography_matrix = np.linalg.inv(homography_matrix)
 
     def abs_to_rel(self, points: np.ndarray):
-        ones = np.ones((len(points), 1))
-        points_with_ones = np.hstack((points, ones))
-        points_transformed = points_with_ones @ self.homography_matrix.T
-        last_column = points_transformed[:, -1]
-        last_column[last_column == 0] = 0.0000001
-        points_transformed = points_transformed / last_column.reshape(-1, 1)
-        new_points_transformed = points_transformed[:, :2]
-        return new_points_transformed
+        pass
 
     def rel_to_abs(self, points: np.ndarray):
-        ones = np.ones((len(points), 1))
-        points_with_ones = np.hstack((points, ones))
-        points_transformed = points_with_ones @ self.inverse_homography_matrix.T
-        last_column = points_transformed[:, -1]
-        last_column[last_column == 0] = 0.0000001
-        points_transformed = points_transformed / last_column.reshape(-1, 1)
-        return points_transformed[:, :2]
+        pass
 
 
 class HomographyTransformationGetter(TransformationGetter):
@@ -269,26 +256,7 @@ def _get_sparse_flow(
     mask=None,
     quality_level=0.01,
 ):
-    if prev_pts is None:
-        # get points
-        prev_pts = cv2.goodFeaturesToTrack(
-            gray_prvs,
-            maxCorners=max_points,
-            qualityLevel=quality_level,
-            minDistance=min_distance,
-            blockSize=block_size,
-            mask=mask,
-        )
-
-    # compute optical flow
-    curr_pts, status, err = cv2.calcOpticalFlowPyrLK(
-        gray_prvs, gray_next, prev_pts, None
-    )
-    # filter valid points
-    idx = np.where(status == 1)[0]
-    prev_pts = prev_pts[idx].reshape((-1, 2))
-    curr_pts = curr_pts[idx].reshape((-1, 2))
-    return curr_pts, prev_pts
+    pass
 
 
 class MotionEstimator:
@@ -392,50 +360,4 @@ class MotionEstimator:
             The CoordinatesTransformation that can transform coordinates on this frame to absolute coordinates
             or vice versa.
         """
-
-        self.gray_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        if self.gray_prvs is None:
-            self.gray_prvs = self.gray_next
-            self.prev_mask = mask
-
-        curr_pts, prev_pts = None, None
-        try:
-            curr_pts, prev_pts = _get_sparse_flow(
-                self.gray_next,
-                self.gray_prvs,
-                self.prev_pts,
-                self.max_points,
-                self.min_distance,
-                self.block_size,
-                self.prev_mask,
-                quality_level=self.quality_level,
-            )
-            if self.draw_flow:
-                for (curr, prev) in zip(curr_pts, prev_pts):
-                    c = tuple(curr.astype(int).ravel())
-                    p = tuple(prev.astype(int).ravel())
-                    cv2.line(frame, c, p, self.flow_color, 2)
-                    cv2.circle(frame, c, 3, self.flow_color, -1)
-        except Exception as e:
-            warning(e)
-
-        update_prvs, coord_transformations = True, None
-        try:
-            update_prvs, coord_transformations = self.transformations_getter(
-                curr_pts, prev_pts
-            )
-        except Exception as e:
-            warning(e)
-            del self.transformations_getter
-            self.transformations_getter = copy.deepcopy(
-                self.transformations_getter_copy
-            )
-
-        if update_prvs:
-            self.gray_prvs = self.gray_next
-            self.prev_pts = None
-            self.prev_mask = mask
-        else:
-            self.prev_pts = prev_pts
-
-        return coord_transformations
+        pass

@@ -93,92 +93,7 @@ def draw_boxes(
     np.ndarray
         The resulting frame.
     """
-    #
-    # handle deprecated parameters
-    #
-    if random_color is not None:
-        warn_once(
-            'Parameter "random_color" is deprecated, set `color="random"` instead'
-        )
-        color = "random"
-    if color_by_label is not None:
-        warn_once(
-            'Parameter "color_by_label" is deprecated, set `color="by_label"` instead'
-        )
-        color = "by_label"
-    if detections is not None:
-        warn_once('Parameter "detections" is deprecated, use "drawables" instead')
-        drawables = detections
-    if line_color is not None:
-        warn_once('Parameter "line_color" is deprecated, use "color" instead')
-        color = line_color
-    if line_width is not None:
-        warn_once('Parameter "line_width" is deprecated, use "thickness" instead')
-        thickness = line_width
-    if label_size is not None:
-        warn_once('Parameter "label_size" is deprecated, use "text_size" instead')
-        text_size = label_size
-    # end
-
-    if color is None:
-        color = "by_id"
-    if thickness is None:
-        thickness = int(max(frame.shape) / 500)
-
-    if drawables is None:
-        return frame
-
-    if text_color is not None:
-        text_color = parse_color(text_color)
-
-    for obj in drawables:
-        if not isinstance(obj, Drawable):
-            d = Drawable(obj)
-        else:
-            d = obj
-
-        if color == "by_id":
-            obj_color = Palette.choose_color(d.id)
-        elif color == "by_label":
-            obj_color = Palette.choose_color(d.label)
-        elif color == "random":
-            obj_color = Palette.choose_color(np.random.rand())
-        else:
-            obj_color = parse_color(color)
-
-        points = d.points.astype(int)
-        if draw_box:
-            Drawer.rectangle(
-                frame,
-                tuple(points),
-                color=obj_color,
-                thickness=thickness,
-            )
-
-        text = _build_text(
-            d, draw_labels=draw_labels, draw_ids=draw_ids, draw_scores=draw_scores
-        )
-        if text:
-            if text_color is None:
-                obj_text_color = obj_color
-            else:
-                obj_text_color = text_color
-            # the anchor will become the bottom-left of the text,
-            # we select-top left of the bbox compensating for the thickness of the box
-            text_anchor = (
-                points[0, 0] - thickness // 2,
-                points[0, 1] - thickness // 2 - 1,
-            )
-            frame = Drawer.text(
-                frame,
-                text,
-                position=text_anchor,
-                size=text_size,
-                color=obj_text_color,
-                thickness=text_thickness,
-            )
-
-    return frame
+    pass
 
 
 def draw_tracked_boxes(
@@ -195,15 +110,4 @@ def draw_tracked_boxes(
     label_width: Optional[int] = None,
 ) -> np.array:
     "**Deprecated**. Use [`draw_box`][norfair.drawing.draw_boxes.draw_boxes]"
-    warn_once("draw_tracked_boxes is deprecated, use draw_box instead")
-    return draw_boxes(
-        frame=frame,
-        drawables=objects,
-        color="by_label" if color_by_label else border_colors,
-        thickness=border_width,
-        text_size=label_size or id_size,
-        text_thickness=id_thickness or label_width,
-        draw_labels=draw_labels,
-        draw_ids=id_size is not None and id_size > 0,
-        draw_box=draw_box,
-    )
+    pass

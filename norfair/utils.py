@@ -11,60 +11,25 @@ from rich.table import Table
 
 def validate_points(points: np.ndarray) -> np.array:
     # If the user is tracking only a single point, reformat it slightly.
-    if len(points.shape) == 1:
-        points = points[np.newaxis, ...]
-    elif len(points.shape) > 2:
-        raise_detection_error_message(points)
-    return points
+    pass
 
 
 def raise_detection_error_message(points):
-    message = "\n[red]INPUT ERROR:[/red]\n"
-    message += f"Each `Detection` object should have a property `points` of shape (num_of_points_to_track, 2), not {points.shape}. Check your `Detection` list creation code.\n"
-    message += "You can read the documentation for the `Detection` class here:\n"
-    message += "https://tryolabs.github.io/norfair/reference/tracker/#norfair.tracker.Detection\n"
-    raise ValueError(message)
+    pass
 
 
 def print_objects_as_table(tracked_objects: Sequence):
     """Used for helping in debugging"""
-    print()
-    console = Console()
-    table = Table(show_header=True, header_style="bold magenta")
-    table.add_column("Id", style="yellow", justify="center")
-    table.add_column("Age", justify="right")
-    table.add_column("Hit Counter", justify="right")
-    table.add_column("Last distance", justify="right")
-    table.add_column("Init Id", justify="center")
-    for obj in tracked_objects:
-        table.add_row(
-            str(obj.id),
-            str(obj.age),
-            str(obj.hit_counter),
-            f"{obj.last_distance:.4f}",
-            str(obj.initializing_id),
-        )
-    console.print(table)
+    pass
 
 
 def get_terminal_size(default: Tuple[int, int] = (80, 24)) -> Tuple[int, int]:
-    columns, lines = default
-    for fd in range(0, 3):  # First in order 0=Std In, 1=Std Out, 2=Std Error
-        try:
-            columns, lines = os.get_terminal_size(fd)
-        except OSError:
-            continue
-        break
-    return columns, lines
+    pass
 
 
 def get_cutout(points, image):
     """Returns a rectangular cut-out from a set of points on an image"""
-    max_x = int(max(points[:, 0]))
-    min_x = int(min(points[:, 0]))
-    max_y = int(max(points[:, 1]))
-    min_y = int(min(points[:, 1]))
-    return image[min_y:max_y, min_x:max_x]
+    pass
 
 
 class DummyOpenCVImport:
@@ -91,4 +56,4 @@ def warn_once(message):
     """
     Write a warning message only once.
     """
-    warn(message)
+    pass

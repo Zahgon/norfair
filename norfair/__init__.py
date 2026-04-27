@@ -30,8 +30,14 @@ from .video import Video
 if sys.version_info >= (3, 8):
     import importlib.metadata
 
-    __version__ = importlib.metadata.version(__name__)
+    try:
+        __version__ = importlib.metadata.version(__name__)
+    except importlib.metadata.PackageNotFoundError:
+        __version__ = "0.0.0"
 elif sys.version_info < (3, 8):
     import importlib_metadata
 
-    __version__ = importlib_metadata.version(__name__)
+    try:
+        __version__ = importlib_metadata.version(__name__)
+    except Exception:
+        __version__ = "0.0.0"
